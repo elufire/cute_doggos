@@ -2,6 +2,7 @@ package com.jbojorquez.cute_doggos
 
 import android.os.Bundle
 import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 
 import io.flutter.app.FlutterActivity
@@ -16,6 +17,9 @@ import io.reactivex.schedulers.Schedulers
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import com.google.firebase.database.DatabaseReference
+
+
 
 
 class MainActivity: FlutterActivity() {
@@ -27,7 +31,11 @@ class MainActivity: FlutterActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    Log.d("KOTLIN", "Made it to Native Code.")
+      val database = FirebaseDatabase.getInstance()
+      val myRef = database.getReference("BaseDb")
+      Log.d("Jose", "The dog is: ${myRef.child("pomeranian").key}")
+
+      Log.d("KOTLIN", "Made it to Native Code.")
     MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
       val passedArgument = call.arguments
       if (call.method == "helloFromNativeCode") {

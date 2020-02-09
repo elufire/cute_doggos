@@ -17,8 +17,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Doggies',
       theme: ThemeData(
-
-        primaryColor: color
+        primaryColor: color,
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: 'SulphurPoint'
+        )
       ),
       home: MyHomePage(),
     );
@@ -419,14 +421,90 @@ class SecondRoute extends StatelessWidget {
       appBar: AppBar(
         title: Text(secondDogBreed.name),
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(8),
+        shrinkWrap: false,
         children: <Widget>[
           Center(
-              child: CachedNetworkImage(imageUrl:secondDogBreed.imageUrl, fit: BoxFit.fill)
+              child: CachedNetworkImage(
+                  imageUrl: secondDogBreed.imageUrl, fit: BoxFit.fill)
           ),
-          Text("The Afghan Hound!"),
+          SizedBox(
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
+                children: <Widget>[
+                  Text("Bred for: ",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16
+                      )),
+                  Text("${secondDogBreed.bred_for}"),
+                ]
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text("Breed group: ${secondDogBreed.breed_group}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16
+                )),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text("Height: ${secondDogBreed.height
+                .imperial} inches, ${secondDogBreed.height.metric} cms",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16
+                      )),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text("Lifespan: ${secondDogBreed.life_span}",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16
+                      )),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+                "Temperament and Behavior: ${secondDogBreed.temperament}",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16
+                      )),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text("Weight: ${secondDogBreed.weight
+                .imperial} pounds, ${secondDogBreed.weight.metric} kgs",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16
+                      )),
+          ),
         ],
-      )
+      ),
     );
   }
 }

@@ -77,3 +77,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
+  fonts:
+    - family: SulphurPoint
+      fonts:
+        - asset: assets/fonts/SulphurPoint-Light.ttf
+          weight: 300
+        - asset: assets/fonts/SulphurPoint-Regular.ttf
+          weight: 500
+        - asset: assets/fonts/SulphurPoint-Bold.ttf
+          weight: 700
