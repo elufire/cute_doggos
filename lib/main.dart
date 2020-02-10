@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cute_doggos/height.dart';
-import 'package:cute_doggos/weight.dart';
 import 'package:cute_doggos/DogBreed.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:convert';
-//import 'package:http/http.dart';
 
 void main() => runApp(MyApp());
 
@@ -49,7 +46,6 @@ class MyHomePageState extends State<MyHomePage> {
   Widget _appBarTitle = new Text("Cute Doggos");
   var _dogList = [];
   bool _loadingInProgress;
-  var _puppies = [["assets/minpin.jpeg", "assets/pomeranian2.jpg", "assets/goldenretriever.jpg"], ["assets/pomeranian2.jpg", "assets/minpin.jpeg", "assets/goldenretriever.jpg"]];//new List.generate(1, (_) => new List(3)).add("assets/pomeranian.jpg");//<String>[["assets/pomeranian.jpg", "minpin.jpeg", "goldenretriever.jpg"]];
   final TextEditingController _filter = new TextEditingController();
   Icon _searchIcon = new Icon(Icons.search);
   static const platform = MethodChannel("flutter.native/helper");
@@ -75,11 +71,7 @@ class MyHomePageState extends State<MyHomePage> {
       final String result = await platform.invokeMethod("getDogData", search);
       response = result;
       print("The response from search is: $response");
-      //List<Map> dogMaps = json.decode(result);
-      //var dogsResponse = json.decode(result);
-      //print("dog API response after decode: $dogsResponse");
       dogBreeds = (json.decode(result) as List).map((dogMap)=> DogBreed.fromJsonMap(dogMap)).toList();
-      //print("Response from native code to Flutter dog name: ${dogBreeds[0].name}");
     } on PlatformException catch (e) {
       response = "Failed to Invoke: '${e.message}'.";
     }
@@ -122,17 +114,6 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-//  void _incrementCounter() {
-//    setState(() {
-//      // This call to setState tells the Flutter framework that something has
-//      // changed in this State, which causes it to rerun the build method below
-//      // so that the display can reflect the updated values. If we changed
-//      // _counter without calling setState(), then the build method would not be
-//      // called again, and so nothing would appear to happen.
-//      _responseFromNativeCode = response;
-//    });
-//  }
-
   @override
   void initState() {
     super.initState();
@@ -141,7 +122,6 @@ class MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    //responseFromNativeCode();
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -165,7 +145,6 @@ class MyHomePageState extends State<MyHomePage> {
               print("Clock clicked");
             },
           ),
-          // overflow menu
           PopupMenuButton<String>(
             onSelected: _menuChoiceSelected,
             itemBuilder: (BuildContext context) {
@@ -179,13 +158,14 @@ class MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            ListTile(leading: Icon(,)
+          ],
+        ),
+      ),
       body: _buildBody(),
-
-//      floatingActionButton: FloatingActionButton(
-//        onPressed: _incrementCounter,
-//        tooltip: 'Increment',
-//        child: Icon(Icons.add),
-//      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
@@ -248,108 +228,8 @@ class MyHomePageState extends State<MyHomePage> {
     return
       Row(
       mainAxisSize: MainAxisSize.min,
-      //crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _buildDogCards(passedPuppy)//<Widget>[
-//        Expanded(
-//          child: InkWell(
-//            onTap: (){
-//              print("Card pressed!");
-//              Navigator.push(
-//                context,
-//                MaterialPageRoute(builder: (context) => SecondRoute()),
-//              );
-//            },
-//          child: Card(
-//            clipBehavior: Clip.hardEdge,
-//
-////                mainAxisSize: MainAxisSize.min,
-//
-//          child: Column(
-//            children: <Widget>[
-//            //Text('Deliver features faster', textAlign: TextAlign.center),
-//              AspectRatio(
-//                aspectRatio: 1,
-//
-//                child: Image.asset("assets/minpin.jpeg", fit: BoxFit.fill),
-//              ),
-//              Container(
-//                padding: EdgeInsets.all(5.0),
-//              child: Text(passedPuppy[0].name, textAlign: TextAlign.center,
-//                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightGreen.withOpacity(0.9)),
-//              ),
-//              ),
-//            ],
-//
-//          )
-//            ),
-//          ),
-//        ),
-//
-//        Expanded(
-//          child: InkWell(
-//            onTap: (){
-//              print("Card pressed!");
-//              Navigator.push(
-//                context,
-//                MaterialPageRoute(builder: (context) => SecondRoute()),
-//              );
-//            },
-//
-//          child: Card(
-//            clipBehavior: Clip.hardEdge,
-//            child: Column(
-//                mainAxisSize: MainAxisSize.min,
-//                children: <Widget>[
-//                  //Text('Deliver features faster', textAlign: TextAlign.center),
-//                  AspectRatio(
-//                    aspectRatio: 1,
-//
-//                    child: Image.asset("assets/minpin.jpeg", fit: BoxFit.fill),
-//                  ),
-//            Container(
-//                padding: EdgeInsets.all(5.0),
-//                  child: Text(passedPuppy[1].name, textAlign: TextAlign.center,
-//                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightGreen.withOpacity(0.9)),
-//                  ),
-//            ),
-//                ]
-//            ),
-//          ),
-//          ),
-//        ),
-//        Expanded(
-//        child: InkWell(
-//          onTap: (){
-//            print("Card pressed!");
-//            Navigator.push(
-//              context,
-//              MaterialPageRoute(builder: (context) => SecondRoute()),
-//            );
-//            },
-//          child: Card(
-//            clipBehavior: Clip.hardEdge,
-//            child: Column(
-//                mainAxisSize: MainAxisSize.min,
-//                children: <Widget>[
-//                  //Text('Deliver features faster', textAlign: TextAlign.center),
-//                  AspectRatio(
-//                    aspectRatio: 1,
-//
-//                    child: Image.asset("assets/minpin.jpeg", fit: BoxFit.fill),
-//                  ),
-//            Container(
-//                padding: EdgeInsets.all(5.0),
-//                  child: Text(passedPuppy[2].name, textAlign: TextAlign.center,
-//                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.lightGreen.withOpacity(0.9)),
-//                  ),
-//            ),
-//                ]
-//            ),
-//          ),
-//        ),
-//        ),
-//      ],
+        children: _buildDogCards(passedPuppy)
     );
   }
 
@@ -382,12 +262,8 @@ class MyHomePageState extends State<MyHomePage> {
             },
           child: Card(
             clipBehavior: Clip.hardEdge,
-
-//                mainAxisSize: MainAxisSize.min,
-
           child: Column(
             children: <Widget>[
-            //Text('Deliver features faster', textAlign: TextAlign.center),
               AspectRatio(
                 aspectRatio: aspectRatio,
                 child: Image.network(dog.imageUrl, fit: BoxFit.fill),
@@ -499,17 +375,17 @@ class SecondRoute extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: Row(
-              children: <Widget>[
-                Text(
-                    "Temperament and Behavior: ",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16
-                    )),
-                Text(secondDogBreed.temperament)
-              ],
-            )
+              child: Text(
+                  "Temperament and Behavior: ",
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16
+                  )),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(secondDogBreed.temperament)
           ),
           SizedBox(
             height: 10,
@@ -595,24 +471,11 @@ class AllBreedsState extends State<AllBreedsRoute>{
         ],
       ),
       body: _buildPuppies(),
-
-//      floatingActionButton: FloatingActionButton(
-//        onPressed: _incrementCounter,
-//        tooltip: 'Increment',
-//        child: Icon(Icons.add),
-//      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
   void _menuChoiceSelected(String selected){
     print("The menuItem selected was $selected");
-
-//    if(selected == "All Dog Breeds"){
-//      Navigator.push(
-//        context,
-//        MaterialPageRoute(builder: (context) => AllBreedsRoute()),
-//      );
-//    }
 
   }
 
@@ -628,9 +491,6 @@ class AllBreedsState extends State<AllBreedsRoute>{
         itemCount: (_dogList.length/3).ceil(),
         itemBuilder: (context, i) {
           List<DogBreed> tempList = new List();
-          //if (i.isOdd) return Divider(); /*2*/
-          //if(i<=_dogList.length){
-          //final index = i % 2;
           tempList.add(_dogList[i*3]);
           if((i*3+1) < _dogList.length){
             tempList.add(_dogList[i*3+1]);
@@ -643,7 +503,6 @@ class AllBreedsState extends State<AllBreedsRoute>{
               padding: EdgeInsets.only(bottom: 12.0),
               child: _buildRow(tempList)
           );
-          //}
 
         });
   }
@@ -652,9 +511,8 @@ class AllBreedsState extends State<AllBreedsRoute>{
     return
       Row(
           mainAxisSize: MainAxisSize.min,
-          //crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: _buildDogCards(passedPuppy)//<Widget>[
+          children: _buildDogCards(passedPuppy)
       );
   }
 
@@ -687,12 +545,8 @@ class AllBreedsState extends State<AllBreedsRoute>{
             },
             child: Card(
                 clipBehavior: Clip.hardEdge,
-
-//                mainAxisSize: MainAxisSize.min,
-
                 child: Column(
                   children: <Widget>[
-                    //Text('Deliver features faster', textAlign: TextAlign.center),
                     AspectRatio(
                       aspectRatio: aspectRatio,
                       child: CachedNetworkImage(imageUrl:dog.imageUrl, fit: BoxFit.fill),
