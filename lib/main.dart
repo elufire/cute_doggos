@@ -450,58 +450,83 @@ class SecondRoute extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text("Breed group: ${secondDogBreed.breed_group}",
-                      style: TextStyle(
+            child: Row(
+              children: <Widget>[
+                Text("Breed group: ",
+                    style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16
-                )),
+                    )),
+                Text(secondDogBreed.breed_group)
+              ]
+            ),
           ),
           SizedBox(
             height: 10,
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text("Height: ${secondDogBreed.height
-                .imperial} inches, ${secondDogBreed.height.metric} cms",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16
-                      )),
+            child: Row(
+              children: <Widget>[
+                Text("Height: ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16
+                    )),
+                Text("${secondDogBreed.height
+                    .imperial} inches, ${secondDogBreed.height.metric} cms")
+              ],
+            )
           ),
           SizedBox(
             height: 10,
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text("Lifespan: ${secondDogBreed.life_span}",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16
-                      )),
+            child: Row(
+              children: <Widget>[
+                Text("Lifespan: ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16
+                    )),
+                Text(secondDogBreed.life_span)
+              ],
+            )
           ),
           SizedBox(
             height: 10,
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(
-                "Temperament and Behavior: ${secondDogBreed.temperament}",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16
-                      )),
+            child: Row(
+              children: <Widget>[
+                Text(
+                    "Temperament and Behavior: ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16
+                    )),
+                Text(secondDogBreed.temperament)
+              ],
+            )
           ),
           SizedBox(
             height: 10,
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text("Weight: ${secondDogBreed.weight
-                .imperial} pounds, ${secondDogBreed.weight.metric} kgs",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16
-                      )),
+            child: Row(
+              children: <Widget>[
+                Text("Weight: ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16
+                    )),
+                Text("${secondDogBreed.weight
+                    .imperial} pounds, ${secondDogBreed.weight.metric} kgs")
+              ],
+            )
           ),
         ],
       ),
