@@ -42,10 +42,13 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - pomeranian.jpg
-    - goldenretriever.jpg
-    - minpin.jpeg
-    - pomeranian2.jpg
+    - assets/images/dog_breed.png
+    - assets/images/dog_house.png
+    - assets/images/dog_bone.png
+    - assets/images/dog_bowl.png
+    - assets/images/dog_lifespan.png
+    - assets/images/dog_playing.png
+    - assets/images/dog_prints.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

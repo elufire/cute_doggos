@@ -1,8 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cute_doggos/DogBreed.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
+
+const SEARCH_DOGS = "SEARCH_DOGS";
+const GET_ALL_DOGS = "GET_ALL_DOGS";
+const DOGS_STREAM = "DOGS_STREAM"
 
 void main() => runApp(MyApp());
 
@@ -43,6 +51,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyHomePageState extends State<MyHomePage> {
+  static const stream = const EventChannel(DOGS_STREAM);
+  StreamSubscription _dogsSubscription = null;
   Widget _appBarTitle = new Text("Cute Doggos");
   var _dogList = [];
   bool _loadingInProgress;
@@ -63,12 +73,12 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> callDogApi(String search) async {
+  Future<void> searchDogApi(String search) async {
     String response = "";
     List<DogBreed> dogBreeds;
     try {
       _loadingInProgress = true;
-      final String result = await platform.invokeMethod("getDogData", search);
+      final String result = await platform.invokeMethod(SEARCH_DOGS, search);
       response = result;
       print("The response from search is: $response");
       dogBreeds = (json.decode(result) as List).map((dogMap)=> DogBreed.fromJsonMap(dogMap)).toList();
@@ -81,10 +91,56 @@ class MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<void> allDogApi() async {
+    String response = "";
+    List<DogBreed> dogBreeds;
+    try {
+      _loadingInProgress = true;
+      final String result = await platform.invokeMethod(GET_ALL_DOGS);
+      response = result;
+      print("The response from search is: $response");
+      dogBreeds = (json.decode(result) as List).map((dogMap)=> DogBreed.fromJsonMap(dogMap)).toList();
+    } on PlatformException catch (e) {
+      response = "Failed to Invoke: '${e.message}'.";
+    }
+    setState(() {
+      _dogList = dogBreeds;
+      _loadingInProgress = false;
+    });
+  }
+
+  void enableDogs() {
+    if(_dogsSubscription != null) {
+      _dogsSubscription = stream.receiveBroadcastStream().listen(updateDogs);
+    }
+  }
+
+  void updateDogs(dogs) {
+    debugPrint("Dogs $dogs");
+    setState(() {
+      _dogList = dogs;
+      _loadingInProgress = false;
+    });
+  }
+
+  void disableDogs() {
+    if(_dogsSubscription != null) {
+      _dogsSubscription.cancel();
+      _dogsSubscription = null
+    }
+  }
+
   void triggerSearch(String searchValue){
     setState(() {
       _loadingInProgress = true;
-      callDogApi(searchValue);
+//      searchDogApi(searchValue);
+    });
+  }
+
+  void allDogsTapped(){
+    setState(() {
+      _loadingInProgress = true;
+      allDogApi();
     });
   }
 
@@ -118,6 +174,13 @@ class MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _loadingInProgress = false;
+    enableDogs();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    disableDogs();
   }
 
   @override
@@ -126,42 +189,88 @@ class MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        leading: IconButton(icon: _searchIcon, onPressed: (){
-          _searchPressed();
-        }),
+//        leading: IconButton(icon: _searchIcon, onPressed: (){
+//          _searchPressed();
+//        }),
         title: _appBarTitle,
         actions: <Widget>[
+          IconButton(icon: _searchIcon, onPressed: (){
+          _searchPressed();
+          }),
           // action button
-          IconButton(
-            icon: Icon(Icons.done_outline),
-            onPressed: () {
-              print("Checkmark clicked");
-            },
-          ),
-          // action button
-          IconButton(
-            icon: Icon(Icons.access_time),
-            onPressed: () {
-              print("Clock clicked");
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: _menuChoiceSelected,
-            itemBuilder: (BuildContext context) {
-              return menuItems.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
-            },
-          ),
+//          IconButton(
+//            icon: Icon(Icons.done_outline),
+//            onPressed: () {
+//              print("Checkmark clicked");
+//            },
+//          ),
+//          // action button
+//          IconButton(
+//            icon: Icon(Icons.access_time),
+//            onPressed: () {
+//              print("Clock clicked");
+//            },
+//          ),
+//          PopupMenuButton<String>(
+//            onSelected: _menuChoiceSelected,
+//            itemBuilder: (BuildContext context) {
+//              return menuItems.map((String choice) {
+//                return PopupMenuItem<String>(
+//                  value: choice,
+//                  child: Text(choice),
+//                );
+//              }).toList();
+//            },
+//          ),
         ],
       ),
       drawer: Drawer(
         child: ListView(
           children: <Widget>[
-            ListTile(leading: Icon(,)
+            ListTile(leading: Image.asset("assets/images/dog_prints.png",
+              width: 30,
+              height: 30,),
+              title: Text("All Breeds"),
+              onTap: (){
+                allDogsTapped();
+                Navigator.pop(context);
+              },
+            ),
+            Container(
+              padding: const EdgeInsets.only(left: 20),
+              child: Text("Categories",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700
+                ),
+              ),
+            ),
+            ListTile(leading: Image.asset("assets/images/dog_breed.png",
+              width: 30,
+              height: 30,),
+              title: Text("Breed Groups"),
+            ),
+            ListTile(leading: Image.asset("assets/images/dog_house.png",
+              width: 30,
+              height: 30,),
+              title: Text("Size"),
+            ),
+            ListTile(leading: Image.asset("assets/images/dog_lifespan.png",
+              width: 30,
+              height: 30,),
+              title: Text("Lifespan"),
+            ),
+            ListTile(leading: Image.asset("assets/images/dog_bowl.png",
+              width: 30,
+              height: 30,),
+              title: Text("About"),
+            ),
+            ListTile(leading: Image.asset("assets/images/dog_bone.png",
+              width: 30,
+              height: 30,),
+              title: Text("Donate"),
+            ),
+//            ListTile(leading: ImageIcon(AssetImage("dog_breed.png"))),
           ],
         ),
       ),
@@ -174,7 +283,14 @@ class MyHomePageState extends State<MyHomePage> {
       return new Center(
         child: new CircularProgressIndicator(),
       );
-    }
+    } //else if(!_loadingInProgress) {
+//      return new Center(
+//        child: Text("Welcome to Cute Doggos Encyclopedia",
+//        style: TextStyle(color: Color(0xededed),
+//          fontWeight: FontWeight.w300,
+//          fontSize: 26),),
+//      );
+//    }
     else{
       return _buildPuppies();
     }

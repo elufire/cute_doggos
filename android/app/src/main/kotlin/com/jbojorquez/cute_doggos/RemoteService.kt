@@ -6,10 +6,14 @@ import retrofit2.http.Query
 
 interface RemoteService {
     @GET("breeds/search")
-        fun getSearchResults(@Query("q")sentSearch: Any):
-            Observable<List<DogBreed>>
+    fun getSearchResults(@Query("q")sentSearch: Any):
+        Observable<List<DogBreed>>
 
     @GET("images/search")
-        fun getImageResults(@Query("breed_id")passedId: Any):
-            Observable<List<DogImage>>
+    fun getImageResults(@Query("breed_id")passedId: Any):
+        Observable<List<DogImage>>
+
+    @GET("breeds")
+    fun getAllBreeds():
+        Observable<List<DogBreed>>
 }
