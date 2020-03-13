@@ -9,197 +9,131 @@ import io.flutter.app.FlutterActivity
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.plugin.common.MethodChannel
 import io.reactivex.Observable
-import io.reactivex.ObservableSource
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
-import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
-import com.google.firebase.database.DatabaseReference
 import io.reactivex.disposables.CompositeDisposable
 import io.flutter.plugin.common.EventChannel
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import sun.jvm.hotspot.utilities.IntArray
-
-
-
+import io.reactivex.subjects.PublishSubject
+import javax.inject.Inject
 
 const val SEARCH_DOGS = "SEARCH_DOGS"
 const val GET_ALL_DOGS = "GET_ALL_DOGS"
 const val DOGS_STREAM = "DOGS_STREAM"
 
-class MainActivity: FlutterActivity() {
-  private val CHANNEL = "flutter.native/helper"
-  //var disposable: Disposable? = null
-  var dogs = ArrayList<DogBreed>()
-    var dogsFinal = ArrayList<DogBreed>()
-  val gson = Gson()
-    val disposables = CompositeDisposable()
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+class MainActivity: FlutterActivity(), EventChannel.StreamHandler {
 
-      val database = FirebaseDatabase.getInstance()
-      val myRef = database.getReference("BaseDb")
-      Log.d("Jose", "The dog is: ${myRef.child("pomeranian").key}")
+    private val CHANNEL = "flutter.native/helper"
+    private val gson = Gson()
+    private val disposables = CompositeDisposable()
+    private val dogEvents = PublishSubject.create<String>()
+    lateinit var disposableAllDogs: Disposable
+    lateinit var disposableDogImages: Disposable
+    lateinit var disposableSearchDogs: Disposable
+    lateinit var disposableDogEvents: Disposable
+    @Inject lateinit var dogRepo : DogRepository
+    var isComplete = true
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-      EventChannel(flutterView, DOGS_STREAM).setStreamHandler(
-              object : EventChannel.StreamHandler {
-                  override fun onListen(args: Any, events: EventChannel.EventSink) {
-                      Log.w("Jose", "adding listener")
-                  }
+        (applicationContext as DogApplication).appComponent.inject(this)
+        val database = FirebaseDatabase.getInstance()
+        val myRef = database.getReference("BaseDb")
+        Log.d("Jose", "The dog is: ${myRef.child("pomeranian").key}")
 
-                  override fun onCancel(args: Any) {
-                      Log.w("Jose", "cancelling listener")
-                  }
-              }
-      )
+        val eventChannel = EventChannel(flutterView, DOGS_STREAM)
+        eventChannel.setStreamHandler(this)
 
-      Log.d("KOTLIN", "Made it to Native Code.")
-    MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
-      val passedArgument = call.arguments
-      if (call.method == "helloFromNativeCode") {
-        val greetings = helloFromNativeCode(passedArgument)
-        result.success(greetings)
-      }
-      when(call.method) {
-          SEARCH_DOGS -> searchDogs(result, passedArgument)
-          GET_ALL_DOGS -> getAllDogs(result)
-      }
-//      if(call.method == SEARCH_DOGS){
-//
-//
-//        //val data = getDogData(passedArgument)
-////          if(disposable.isDisposed){
-////
-////          }
-//      }
-    }
-    GeneratedPluginRegistrant.registerWith(this)
+        Log.d("KOTLIN", "Made it to Native Code.")
+        MethodChannel(flutterView, CHANNEL).setMethodCallHandler { call, result ->
+            val passedArgument = call.arguments
+            if (call.method == "helloFromNativeCode") {
+                val greetings = helloFromNativeCode(passedArgument)
+                result.success(greetings)
+            }
+            when(call.method) {
+                  SEARCH_DOGS -> searchDogs(result, passedArgument)
+                  GET_ALL_DOGS -> getAllDogs()
+            }
+        }
+        GeneratedPluginRegistrant.registerWith(this)
   }
 
-    private fun getAllDogs(result: MethodChannel.Result) {
-        var data: String ?= "Hey it failed"
+    private fun getAllDogs() {
+
+        if(!isComplete) {
+            disposableAllDogs.dispose()
+            disposableDogImages.dispose()
+        }
+        isComplete = false
+        var data: String = "Hey it failed"
+        disposableAllDogs = dogRepo.getAllDogs()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {resultCall ->
+                            getDogImages(resultCall)
+                        },
+                        { error -> Log.d("TAG",
+                                "ERROR IN API CALL Dog List ${error.message}")}
+                )
         disposables.add(
-                getRemoteService("https://api.thedogapi.com/v1/").getAllBreeds()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        //.doOnNext((List<DogBreed>) -> )
-                        //.doOnNext { reCall ->  }
-                        .subscribe(
-                                {resultCall ->
-                                    //data = gson.toJson(resultCall)
-                                    //Log.d("getDogData", returnSearch)
-
-                                    ///dogs.addAll(resultCall)
-                                    //dogs.flatMap {  }
-
-                                    Observable.fromIterable(resultCall)
-                                            .flatMap(Function<DogBreed, ObservableSource<List<DogImage>>>(){
-                                                getRemoteService("https://api.thedogapi.com/v1/").getImageResults(it.id)//.onErrorReturnItem(listOf(DogImage(0,"0","https://www.clipartqueen.com/image-files/dog-silhouette-dalmatiner.jpg", 0)))//.onErrorReturn { listOf(DogImage(0,"0","https://www.clipartqueen.com/image-files/dog-silhouette-dalmatiner.jpg", 0)) }
-                                            })
-                                            .toList()
-                                            .subscribeOn(Schedulers.io())
-                                            .observeOn(AndroidSchedulers.mainThread())
-                                            .subscribe ({ imageList ->
-                                                Log.d("Jose", "The image url is ${imageList[0][0].url}")
-                                                var index = 0
-                                                if (imageList.isNotEmpty()) {
-                                                    //Log.d("onImageCall", "Image list size should be ${resultCall.size}, it really is ${imageList[1].isEmpty()}")
-                                                    resultCall.forEach {
-                                                        if (imageList[index].isNotEmpty()) {
-                                                            it.imageUrl = imageList[index][0].url
-                                                            dogsFinal.add(it)
-                                                        } else {
-                                                            it.imageUrl = "https://www.clipartqueen.com/image-files/dog-silhouette-${it.breed_group}.jpg"
-                                                            dogsFinal.add(it)
-                                                        }
-
-                                                        index++
-                                                    }
-                                                    data = gson.toJson(dogsFinal)
-                                                    dogsFinal.clear()
-                                                    result.success(data)
-                                                }
-                                            },
-                                                { error -> Log.d("Jose", "ERROR IN API CALL Dog List ${error.message}")}
-
-                                                )
-
-//                          Log.d("getDogData", "Returned data is: ${dogs.get(1).name}")
-//                          Log.d("DOGDATA", "Dog data is: $data")
-//                          dogs = getImages(dogs)
-                                    //dogs.clear()
-                                    //Log.d("getDogData", "Temp dog list first name: ${tempDogs[0].name}")
-                                    //val data = gson.toJson(tempDogs)
-//                            Log.d("getDogData", "After images added to dog list: ${tempDogs[0].name}")
-                                    //tempDogs.clear()
-                                    //result.success(data)
-                                },
-                                { error -> Log.d("TAG", "ERROR IN API CALL Dog List ${error.message}")}
-                                //{result.success(data)}
-                        )
+               disposableAllDogs
         )
+    }
+
+    private fun getDogImages(resultCall: List<DogBreed>) {
+        var dogsFinal = ArrayList<DogBreed>()
+        var data: String ?= "Hey it failed"
+        var index = 0
+        disposableDogImages = Observable.fromIterable(resultCall)
+                .flatMap {
+                    dogRepo.getDogImages(it.id)
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete{ isComplete = true }
+                .subscribe { imageList ->
+
+                    if(imageList.isNotEmpty()){
+                        if (!imageList[0].url.isEmpty()) {
+                            resultCall[index].imageUrl = imageList[0].url
+                            dogsFinal.add(resultCall[index])
+                        } else {
+                            resultCall[index].imageUrl =
+                                    "https://www.clipartqueen.com/image-files/dog-silhouette-" +
+                                            "${resultCall[index].breed_group}.jpg"
+                            dogsFinal.add(resultCall[index])
+                        }
+                    } else {
+                        resultCall[index].imageUrl =
+                                "https://www.clipartqueen.com/image-files/dog-silhouette-" +
+                                        "${resultCall[index].breed_group}.jpg"
+                        dogsFinal.add(resultCall[index])
+                    }
+                    index++
+                    data = gson.toJson(dogsFinal)
+                    dogEvents.onNext(gson.toJson(dogsFinal))
+                }
+        disposables.add(disposableDogImages)
     }
 
     private fun searchDogs(result: MethodChannel.Result, passedArgument: Any) {
         var data: String ?= "Hey it failed"
-        disposables.add(getRemoteService("https://api.thedogapi.com/v1/").getSearchResults(passedArgument)
+        disposableAllDogs.dispose()
+        disposableDogImages.dispose()
+        disposableSearchDogs = dogRepo.searchDogs(passedArgument)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                //.doOnNext((List<DogBreed>) -> )
-                //.doOnNext { reCall ->  }
                 .subscribe(
                         {resultCall ->
-                            //data = gson.toJson(resultCall)
-                            //Log.d("getDogData", returnSearch)
-
-                            ///dogs.addAll(resultCall)
-                            //dogs.flatMap {  }
-
-                            Observable.fromIterable(resultCall)
-                                    .flatMap(Function<DogBreed, ObservableSource<List<DogImage>>>(){
-                                        getRemoteService("https://api.thedogapi.com/v1/").getImageResults(it.id)//.onErrorReturnItem(listOf(DogImage(0,"0","https://www.clipartqueen.com/image-files/dog-silhouette-dalmatiner.jpg", 0)))//.onErrorReturn { listOf(DogImage(0,"0","https://www.clipartqueen.com/image-files/dog-silhouette-dalmatiner.jpg", 0)) }
-                                    })
-                                    .toList()
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe { imageList ->
-                                        var index = 0
-                                        if(imageList.isNotEmpty()){
-                                            //Log.d("onImageCall", "Image list size should be ${resultCall.size}, it really is ${imageList[1].isEmpty()}")
-                                            resultCall.forEach{
-                                                if (imageList[index].isNotEmpty()){
-                                                    it.imageUrl = imageList[index][0].url
-                                                    dogsFinal.add(it)
-                                                } else{
-                                                    it.imageUrl = "https://www.clipartqueen.com/image-files/dog-silhouette-${it.breed_group}.jpg"
-                                                    dogsFinal.add(it)
-                                                }
-
-                                                index++
-                                            }
-                                            data = gson.toJson(dogsFinal)
-                                            dogsFinal.clear()
-                                            result.success(data)
-                                        }
-
-                                    }
-
-//                          Log.d("getDogData", "Returned data is: ${dogs.get(1).name}")
-//                          Log.d("DOGDATA", "Dog data is: $data")
-//                          dogs = getImages(dogs)
-                            //dogs.clear()
-                            //Log.d("getDogData", "Temp dog list first name: ${tempDogs[0].name}")
-                            //val data = gson.toJson(tempDogs)
-//                            Log.d("getDogData", "After images added to dog list: ${tempDogs[0].name}")
-                            //tempDogs.clear()
-                            //result.success(data)
+                            getDogImages(resultCall)
                         },
-                        { error -> Log.d("TAG", "ERROR IN API CALL Dog List ${error.message}")}
-                        //{result.success(data)}
+                        { error -> Log.d("TAG", "ERROR IN API CALL Dog List " +
+                                "${error.message}")}
                 )
+        disposables.add(
+            disposableSearchDogs
         )
     }
 
@@ -218,50 +152,22 @@ class MainActivity: FlutterActivity() {
     }
   }
 
-//  private fun getDogData(passedSearch: Any): String?{
-//    var returnSearch: String
-//
-//    return returnSearch
-//  }
+    override fun onListen(p0: Any?, events: EventChannel.EventSink) {
+        Log.d("Jose", "adding listener")
+        disposableDogEvents = dogEvents
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    events.success(it)
+                }
+    }
 
-//    fun getImages(dogBreeds: List<DogBreed>): ArrayList<DogBreed> {
-//        var tempDogs = ArrayList<DogBreed>()
-//        for (dog: DogBreed in dogBreeds){
-//            getRemoteService().getImageResults(dog.id)
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(
-//                            {dogImageList ->
-//                                                                              if(dogImageList[0] != null){
-//
-//                                              }
-//                                              Log.d("DogImageCall", "Breed id ${dog.id} image is: ${dogImageList[0].url}")
-//                                                dog.imageUrl = dogImageList[0].url
-//                                dog.imageUrl = "assets/minpin.jpeg"
-//                                tempDogs.add(dog)
-//                                Log.d("imageUrl", "image Url is: ${tempDogs.last().imageUrl}")
-//                                //tempDogs.add(dog)
-//                            },
-//                            { error -> Log.d("TAG", "ERROR IN API CALL Photo ${error.message}")}
-//                    )
-//        }
-//        return tempDogs
-//    }
-
-  private fun getRetrofit(url: String): Retrofit = Retrofit.Builder()
-          .baseUrl(url)
-          .addConverterFactory(GsonConverterFactory.create())
-          .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-          .build()
-
-  private fun getRemoteService(url: String): RemoteService = getRetrofit(url).create(RemoteService::class.java)
+    override fun onCancel(p0: Any?) {
+        Log.d("Jose", "cancelling listener")
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         disposables.clear()
     }
-
-//  private fun createRetrofit(): {
-//
-//  }
 }

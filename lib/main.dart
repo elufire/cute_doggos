@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 
 const SEARCH_DOGS = "SEARCH_DOGS";
 const GET_ALL_DOGS = "GET_ALL_DOGS";
-const DOGS_STREAM = "DOGS_STREAM"
+const DOGS_STREAM = "DOGS_STREAM";
 
 void main() => runApp(MyApp());
 
@@ -110,7 +110,7 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   void enableDogs() {
-    if(_dogsSubscription != null) {
+    if(_dogsSubscription == null) {
       _dogsSubscription = stream.receiveBroadcastStream().listen(updateDogs);
     }
   }
@@ -118,7 +118,7 @@ class MyHomePageState extends State<MyHomePage> {
   void updateDogs(dogs) {
     debugPrint("Dogs $dogs");
     setState(() {
-      _dogList = dogs;
+      _dogList = (json.decode(dogs) as List).map((dogMap)=> DogBreed.fromJsonMap(dogMap)).toList();
       _loadingInProgress = false;
     });
   }
@@ -126,7 +126,7 @@ class MyHomePageState extends State<MyHomePage> {
   void disableDogs() {
     if(_dogsSubscription != null) {
       _dogsSubscription.cancel();
-      _dogsSubscription = null
+      _dogsSubscription = null;
     }
   }
 
@@ -134,13 +134,15 @@ class MyHomePageState extends State<MyHomePage> {
     setState(() {
       _loadingInProgress = true;
 //      searchDogApi(searchValue);
+      platform.invokeMethod(SEARCH_DOGS, searchValue);
     });
   }
 
   void allDogsTapped(){
     setState(() {
       _loadingInProgress = true;
-      allDogApi();
+//      allDogApi();
+      platform.invokeMethod(GET_ALL_DOGS);
     });
   }
 
