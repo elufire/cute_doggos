@@ -5,5 +5,5 @@ import javax.inject.Singleton
 
 @Singleton
 class MemoryCache {
-    val lruCache = LruCache<String, String>()
+//    val lruCache = LruCache<String, String>()
 }

@@ -1,0 +1,93 @@
+{
+  "project_info": {
+    "project_number": "233175613626",
+    "firebase_url": "https://fir-e1082.firebaseio.com",
+    "project_id": "fir-e1082",
+    "storage_bucket": "fir-e1082.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233175613626:android:1b7829f2ac180d28",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "233175613626-firrr692v3tmpgd2ndc9g77bb58emnbc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.firebase",
+            "certificate_hash": "d4b70637f6cfd6fbe7f1acdc080a1aab643233fa"
+          }
+        },
+        {
+          "client_id": "233175613626-nb2r67aelb82dsngkfd7v9vmmg980m4f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqY510Wl_E9dWIvBX4iBWWvONHT3jb3BQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "233175613626-nb2r67aelb82dsngkfd7v9vmmg980m4f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233175613626:android:95975e2359d5206ce54283",
+        "android_client_info": {
+          "package_name": "com.jbojorquez.cute_doggos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "233175613626-i81bgu646iuhm3kpgel21a08sba1cd0m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jbojorquez.cute_doggos",
+            "certificate_hash": "a51a3d8f65384ec42ef35f65459ea5cce1c07668"
+          }
+        },
+        {
+          "client_id": "233175613626-cl53ajv8gcmj86cj9ahsdh58teuspug0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jbojorquez.cute_doggos",
+            "certificate_hash": "666e4f4aa85c8aa4e4e7fff87cd680e377cf9f5e"
+          }
+        },
+        {
+          "client_id": "233175613626-nb2r67aelb82dsngkfd7v9vmmg980m4f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqY510Wl_E9dWIvBX4iBWWvONHT3jb3BQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "233175613626-nb2r67aelb82dsngkfd7v9vmmg980m4f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

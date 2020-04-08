@@ -3,6 +3,8 @@ package com.jbojorquez.cute_doggos
 import android.os.Bundle
 import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.google.gson.Gson
 
 import io.flutter.app.FlutterActivity
@@ -15,7 +17,9 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.flutter.plugin.common.EventChannel
 import io.reactivex.subjects.PublishSubject
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 const val SEARCH_DOGS = "SEARCH_DOGS"
 const val GET_ALL_DOGS = "GET_ALL_DOGS"
@@ -31,14 +35,16 @@ class MainActivity: FlutterActivity(), EventChannel.StreamHandler {
     lateinit var disposableDogImages: Disposable
     lateinit var disposableSearchDogs: Disposable
     lateinit var disposableDogEvents: Disposable
+    val database = FirebaseDatabase.getInstance()
+    val firebaseStorage = FirebaseStorage.getInstance()
+    val storageRef = firebaseStorage.reference
+    val myRef = database.getReference("BaseDb")
     @Inject lateinit var dogRepo : DogRepository
     var isComplete = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         (applicationContext as DogApplication).appComponent.inject(this)
-        val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("BaseDb")
         Log.d("Jose", "The dog is: ${myRef.child("pomeranian").key}")
 
         val eventChannel = EventChannel(flutterView, DOGS_STREAM)
@@ -100,15 +106,20 @@ class MainActivity: FlutterActivity(), EventChannel.StreamHandler {
                             resultCall[index].imageUrl = imageList[0].url
                             dogsFinal.add(resultCall[index])
                         } else {
-                            resultCall[index].imageUrl =
-                                    "https://www.clipartqueen.com/image-files/dog-silhouette-" +
-                                            "${resultCall[index].breed_group}.jpg"
+                            Log.d("Jose", "Missing dog image url is ${storageRef.child(resultCall[index].name.toLowerCase(Locale.ROOT).replace(" ", "_")).downloadUrl.result.toString()}")
+//                            myRef.child(resultCall[index].name.toLowerCase(Locale.ROOT).replace(" ", "_")).key?.let {
+//                                resultCall[index].imageUrl = it
+//                            }
                             dogsFinal.add(resultCall[index])
                         }
                     } else {
-                        resultCall[index].imageUrl =
-                                "https://www.clipartqueen.com/image-files/dog-silhouette-" +
-                                        "${resultCall[index].breed_group}.jpg"
+//                        resultCall[index].imageUrl =
+//                                "https://www.clipartqueen.com/image-files/dog-silhouette-" +
+//                                        "${resultCall[index].breed_group}.jpg"
+                        Log.d("Jose", "Missing dog image url is ${storageRef.child(resultCall[index].name.toLowerCase(Locale.ROOT).replace(" ", "_")).downloadUrl.result.toString()}")
+//                        storageRef.child(resultCall[index].name.toLowerCase(Locale.ROOT).replace(" ", "_")).downloadUrl.result.toString() let {
+//                            resultCall[index].imageUrl = it
+//                        }
                         dogsFinal.add(resultCall[index])
                     }
                     index++
